@@ -1,0 +1,47 @@
+:root {
+  --bg-sky: #aee;
+  --bg-grass: #7d5;
+  --bg-dirt: #8b4513;
+  --primary-yellow: #ffeb3b;
+  --primary-green: #4caf50;
+  --text-dark: #333;
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --font-main: 'Outfit', sans-serif;
+  --soft-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background: #f0f8ff; /* Fallback */
+  color: var(--text-dark);
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
