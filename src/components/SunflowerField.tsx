@@ -43,14 +43,17 @@ const SunflowerField: React.FC<Props> = ({ schools, compact = false }) => {
         }
         .sunflower-field.compact .field-grid {
           display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          gap: 15px;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          gap: 10px;
+          overflow-x: auto;
+          padding-bottom: 15px;
         }
         .sunflower-field.compact .sunflower-wrapper {
-          transform: scale(0.95);
+          transform: scale(0.85);
           transform-origin: top center;
-          height: 195px; /* カード全体の高さを縮小時にクリップしないように調整 */
+          height: 190px;
+          flex-shrink: 0;
         }
       `}</style>
     </div>
