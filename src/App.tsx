@@ -105,7 +105,7 @@ function App() {
         </div>
         <div className="stats-bar">
           <div className="stat-item">
-            <span className="stat-label">{mode === 'exam' ? '受験生平均達成率' : '全体平均達成率'}</span>
+            <span className="stat-label">{mode === 'exam' ? 'TOMONI受験生達成率' : 'TOMONI全体達成率'}</span>
             <span className="stat-value">{stats.avgRate.toFixed(1)}%</span>
           </div>
           <div className="stat-item">
