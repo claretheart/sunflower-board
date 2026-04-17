@@ -39,7 +39,7 @@ const Sunflower: React.FC<Props> = ({ school }) => {
         {school.stage === 20 && <div className="sparkles" />}
       </div>
       <div className="school-info">
-        <span className="school-name">{school.name}</span>
+        <span className="school-name" translate="no">{school.name}</span>
         <span className="school-rate">{school.rate.toFixed(1)}%</span>
       </div>
 

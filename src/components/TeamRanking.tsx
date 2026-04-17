@@ -69,7 +69,7 @@ const TeamRanking: React.FC<Props> = ({ schools }) => {
             <div className="team-card-bg" style={{ backgroundImage: `url(${getImageUrl(team.stage)})` }}></div>
             <div className="team-card-content">
               <div className="rank-badge">{index + 1}位</div>
-              <h3 className="team-name">{team.name}</h3>
+              <h3 className="team-name" translate="no">{team.name}</h3>
               <div className="team-rate">{team.rate.toFixed(1)}<span className="percent">%</span></div>
               
               <div className="progress-container">
@@ -89,7 +89,7 @@ const TeamRanking: React.FC<Props> = ({ schools }) => {
       <div className="team-schools-area">
         {activeTeamData && (
           <div className="team-schools-header">
-            <h3>{activeTeamData.name} の所属教室</h3>
+            <h3 translate="no">{activeTeamData.name} の所属教室</h3>
             <span className="avg-badge">
               チーム達成率 {activeTeamData.rate.toFixed(1)}%
             </span>
