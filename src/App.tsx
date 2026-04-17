@@ -101,7 +101,7 @@ function App() {
       <header className="app-header">
         <div className="logo">
           <Sun className="icon-sun" size={32} />
-          <h1>TOMONIひまわり畑</h1>
+          <h1>TOMONIひまわり畑2026</h1>
         </div>
         <div className="stats-bar">
           <div className="stat-item">
