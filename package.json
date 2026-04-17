@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://claretheart.github.io/sunflower-board/",
+  "homepage": "https://claretheart.github.io/tomoni-himawari/",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
