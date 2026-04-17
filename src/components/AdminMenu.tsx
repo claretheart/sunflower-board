@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import type { SchoolData } from '../data';
-import { X, Upload, Save, Lock, AlertCircle, Settings } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { X, Lock, AlertCircle, Settings } from 'lucide-react';
 
 interface Props {
   data: SchoolData[];
-  onUpdate: (newData: SchoolData[]) => void;
   onClose: () => void;
 }
 
-const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
+const AdminMenu: React.FC<Props> = ({ data, onClose }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [editingData, setEditingData] = useState<SchoolData[]>([...data]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,45 +20,6 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
     } else {
       setError('パスワードが違います');
     }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const bstr = evt.target?.result;
-      const wb = XLSX.read(bstr, { type: 'binary' });
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      const jsonData = XLSX.utils.sheet_to_json(ws) as any[];
-
-      const updated = editingData.map(school => {
-        const row = jsonData.find(r => r['教室名'] === school.name || r['name'] === school.name);
-        if (row) {
-          return {
-            ...school,
-            target: Number(row['目標値'] || row['target'] || school.target),
-            achievement: Number(row['実績値'] || row['achievement'] || school.achievement)
-          };
-        }
-        return school;
-      });
-
-      setEditingData(updated);
-    };
-    reader.readAsBinaryString(file);
-  };
-
-  const handleManualChange = (id: string, field: 'target' | 'achievement', value: string) => {
-    const numValue = parseInt(value) || 0;
-    setEditingData(prev => prev.map(s => s.id === id ? { ...s, [field]: numValue } : s));
-  };
-
-  const handleSave = () => {
-    onUpdate(editingData);
-    onClose();
   };
 
   if (!isAuthenticated) {
@@ -135,27 +93,15 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
           </div>
           <button className="close-btn" onClick={onClose}><X /></button>
         </header>
-        
+
         <div className="modal-content">
           <div className="admin-actions">
             <div className="admin-buttons-row">
-              <div className="file-upload">
-                <label htmlFor="excel-upload" className="upload-label">
-                  <Upload size={20} />
-                  <span>Excel or CSVから一括インポート (.xlsx, .csv)</span>
-                </label>
-                <input id="excel-upload" type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} style={{ display: 'none' }} />
+              <div className="alert-info">
+                <strong><AlertCircle size={18} /> データは自動同期されています</strong>
+                <p>Googleスプレッドシートとの連携が有効です。<br/>数値の更新は指定のスプレッドシート上で行ってください。変更はリロードで自動反映されます。</p>
               </div>
-              <button className="reset-btn" onClick={() => {
-                if (window.confirm('現在のデータをリセットして、デモ用（成長中）のデータを読み込みますか？')) {
-                  // data.ts の INITIAL_DATA を基準に更新
-                  import('../data').then(m => setEditingData([...m.INITIAL_DATA]));
-                }
-              }}>
-                デモデータを読み込む
-              </button>
             </div>
-            <p className="hint-text"><AlertCircle size={14} /> 「教室名」「目標値」「実績値」の列を含むファイルを指定してください。</p>
           </div>
 
           <div className="data-table-wrapper">
@@ -163,6 +109,7 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
               <thead>
                 <tr>
                   <th>エリア</th>
+                  <th>チーム</th>
                   <th>教室名</th>
                   <th>目標コマ数</th>
                   <th>実績コマ数</th>
@@ -170,25 +117,14 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                {editingData.map(school => (
+                {data.map(school => (
                   <tr key={school.id}>
                     <td className="area-cell">{school.region}</td>
+                    <td className="team-cell">{school.team || '未設定'}</td>
                     <td className="name-cell">{school.name}</td>
-                    <td>
-                      <input 
-                        type="number" 
-                        value={school.target} 
-                        onChange={(e) => handleManualChange(school.id, 'target', e.target.value)} 
-                      />
-                    </td>
-                    <td>
-                      <input 
-                        type="number" 
-                        value={school.achievement} 
-                        onChange={(e) => handleManualChange(school.id, 'achievement', e.target.value)} 
-                      />
-                    </td>
-                      {((school.achievement / school.target) * 100).toFixed(1)}%
+                    <td>{school.target}</td>
+                    <td>{school.achievement}</td>
+                    <td className="rate-cell">{school.rate.toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -197,11 +133,7 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
         </div>
 
         <footer className="modal-footer">
-          <button className="cancel-pill" onClick={onClose}>キャンセル</button>
-          <button className="save-pill" onClick={handleSave}>
-            <Save size={18} />
-            変更を適用する
-          </button>
+          <button className="cancel-pill" onClick={onClose}>閉じる</button>
         </footer>
       </div>
 
@@ -231,46 +163,28 @@ const AdminMenu: React.FC<Props> = ({ data, onUpdate, onClose }) => {
         
         .modal-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 30px; }
         .admin-actions { margin-bottom: 25px; }
-        .admin-buttons-row { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        .upload-label {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          background: #e3f2fd;
-          color: #1976d2;
-          padding: 12px 24px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 700;
-          transition: all 0.2s;
+        .alert-info {
+           background: #e3f2fd;
+           padding: 15px 20px;
+           border-radius: 12px;
+           color: #1976d2;
         }
-        .upload-label:hover { background: #bbdefb; }
-        .reset-btn {
-          background: #fff3e0;
-          color: #ef6c00;
-          border: 2px solid #ffe0b2;
-          padding: 10px 20px;
-          border-radius: 12px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #ffe0b2; }
-        .hint-text { font-size: 0.8rem; color: #888; margin-top: 10px; display: flex; align-items: center; gap: 5px; }
+        .alert-info strong { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 1.1rem; }
+        .alert-info p { margin: 0; font-size: 0.95rem; line-height: 1.4; color: #0d47a1; }
         
         .data-table-wrapper { flex: 1; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; }
         .data-table { width: 100%; border-collapse: collapse; }
         .data-table th { position: sticky; top: 0; background: #fafafa; border-bottom: 2px solid #eee; padding: 12px; text-align: left; font-size: 0.9rem; color: #666; }
         .data-table td { padding: 8px 12px; border-bottom: 1px solid #f5f5f5; }
-        .data-table input { width: 80px; padding: 6px; border: 1px solid #ddd; border-radius: 6px; text-align: right; }
         
         .area-cell { font-size: 0.8rem; color: #888; }
+        .team-cell { font-size: 0.8rem; color: #444; background: #fafafa; border-radius: 4px; padding: 4px 8px; }
         .name-cell { font-weight: 700; color: #5d4037; }
         .rate-cell { font-weight: 800; color: #388e3c; }
 
         .modal-footer { padding: 20px 30px; border-top: 2px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 15px; background: #fafafa; }
-        .save-pill { background: #388e3c; color: white; border: none; padding: 10px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-        .save-pill:hover { background: #2e7d32; }
+        .cancel-pill { background: #eee; color: #666; border: none; padding: 10px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .cancel-pill:hover { background: #ddd; }
 
         .icon-spin:hover { animation: spin 2s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

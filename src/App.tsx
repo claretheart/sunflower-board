@@ -3,35 +3,45 @@ import './App.css';
 import type { SchoolData } from './data';
 import { INITIAL_DATA, calculateStage } from './data';
 import SunflowerField from './components/SunflowerField.tsx';
+import TeamRanking from './components/TeamRanking.tsx';
 import RankingPanel from './components/RankingPanel.tsx';
+import { GOOGLE_SHEETS_CSV_URL, fetchAndUpdateData } from './utils/syncData';
 import AdminMenu from './components/AdminMenu.tsx';
 import { Settings, Sun, Cloud } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 function App() {
-  const [data, setData] = useState<SchoolData[]>(() => {
-    const saved = localStorage.getItem('sunflower_data');
-    return saved ? JSON.parse(saved) : INITIAL_DATA;
-  });
+  // データは初期値からスタートし、マウント後に外部から取得する
+  const [data, setData] = useState<SchoolData[]>(INITIAL_DATA);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
+  
+  // URLハッシュによるタブ切り替え
+  const [activeTab, setActiveTab] = useState<'farm' | 'team'>(() => {
+    return window.location.hash === '#team' ? 'team' : 'farm';
+  });
 
   useEffect(() => {
-    // 起動時に現在のロジックでステージを再計算し、0以下のステージを1以上に補正
-    const validatedData = data.map(d => ({
-      ...d,
-      stage: calculateStage(d.rate)
-    }));
-    
-    // データに変更がある場合のみ更新
-    if (JSON.stringify(validatedData) !== JSON.stringify(data)) {
-      setData(validatedData);
-    }
+    const handleHashChange = () => {
+      setActiveTab(window.location.hash === '#team' ? 'team' : 'farm');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // 初回ロード時に Google Sheets CSV 等からフェッチ
   useEffect(() => {
-    localStorage.setItem('sunflower_data', JSON.stringify(data));
-  }, [data]);
+    const loadData = async () => {
+      if (GOOGLE_SHEETS_CSV_URL) {
+        const newData = await fetchAndUpdateData(INITIAL_DATA, GOOGLE_SHEETS_CSV_URL);
+        updateData(newData);
+      } else {
+        updateData(INITIAL_DATA);
+      }
+    };
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const stats = useMemo(() => {
     const totalAchieved = data.reduce((sum, d) => sum + d.achievement, 0);
@@ -95,6 +105,20 @@ function App() {
             <span className="stat-value">残り {stats.daysLeft} 日</span>
           </div>
         </div>
+        <div className="tab-controls">
+          <a 
+            href="#farm" 
+            className={`tab-btn ${activeTab === 'farm' ? 'active' : ''}`}
+          >
+            ひまわり畑
+          </a>
+          <a 
+            href="#team" 
+            className={`tab-btn ${activeTab === 'team' ? 'active' : ''}`}
+          >
+            チームランキング
+          </a>
+        </div>
         <button className="admin-btn" onClick={() => setIsAdminOpen(true)}>
           <Settings size={20} />
           <span>管理</span>
@@ -102,7 +126,11 @@ function App() {
       </header>
 
       <main className="content-area">
-        <SunflowerField schools={data} />
+        {activeTab === 'farm' ? (
+          <SunflowerField schools={data} />
+        ) : (
+          <TeamRanking schools={data} />
+        )}
         <aside className={`side-panel ${showRanking ? 'open' : ''}`}>
           <button className="toggle-ranking" onClick={() => setShowRanking(!showRanking)}>
             {showRanking ? '◀ フィールド表示' : '▶ ランキング表示'}
@@ -114,7 +142,6 @@ function App() {
       {isAdminOpen && (
         <AdminMenu 
           data={data} 
-          onUpdate={updateData} 
           onClose={() => setIsAdminOpen(false)} 
         />
       )}
