@@ -17,13 +17,21 @@ function App() {
   const [showRanking, setShowRanking] = useState(false);
   
   // URLハッシュによるタブ切り替え
-  const [activeTab, setActiveTab] = useState<'farm' | 'team'>(() => {
-    return window.location.hash === '#team' ? 'team' : 'farm';
+  type TabType = 'farm' | 'team' | 'exam-farm' | 'exam-team';
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (['farm', 'team', 'exam-farm', 'exam-team'].includes(hash)) {
+      return hash as TabType;
+    }
+    return 'farm';
   });
+  
+  const mode: 'overall' | 'exam' = activeTab.includes('exam') ? 'exam' : 'overall';
 
   useEffect(() => {
     const handleHashChange = () => {
-      setActiveTab(window.location.hash === '#team' ? 'team' : 'farm');
+      const hash = window.location.hash.replace('#', '');
+      setActiveTab((['farm', 'team', 'exam-farm', 'exam-team'].includes(hash) ? hash : 'farm') as TabType);
     };
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
@@ -44,18 +52,19 @@ function App() {
   }, []);
 
   const stats = useMemo(() => {
-    const totalAchieved = data.reduce((sum, d) => sum + d.achievement, 0);
-    const totalTarget = data.reduce((sum, d) => sum + d.target, 0);
-    const avgRate = (totalAchieved / totalTarget) * 100 || 0;
-    const fullBloomCount = data.filter(d => d.rate >= 100).length;
+    const isExam = mode === 'exam';
+    const totalAchieved = data.reduce((sum, d) => sum + (isExam ? (d.examAchievement || 0) : d.achievement), 0);
+    const totalTarget = data.reduce((sum, d) => sum + (isExam ? (d.examTarget || 0) : d.target), 0);
+    const avgRate = totalTarget > 0 ? (totalAchieved / totalTarget) * 100 : 0;
+    const fullBloomCount = data.filter(d => (isExam ? (d.examRate || 0) : d.rate) >= 100).length;
     
     // Remaining days until June 30th (from current time provided)
-    const now = new Date('2026-04-16T15:44:11');
+    const now = new Date();
     const end = new Date('2026-06-30T23:59:59');
     const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     return { avgRate, fullBloomCount, daysLeft: diff };
-  }, [data]);
+  }, [data, mode]);
 
   const updateData = (newData: SchoolData[]) => {
     // Check for newly achieved 100%
@@ -75,11 +84,14 @@ function App() {
     }
 
     setData(newData.map(d => {
-      const rate = parseFloat(((d.achievement / d.target) * 100).toFixed(1));
+      const rate = d.target > 0 ? parseFloat(((d.achievement / d.target) * 100).toFixed(1)) : 0;
+      const examRate = (d.examTarget && d.examTarget > 0) ? parseFloat((((d.examAchievement || 0) / d.examTarget) * 100).toFixed(1)) : 0;
       return {
         ...d,
         rate,
-        stage: calculateStage(rate)
+        stage: calculateStage(rate),
+        examRate,
+        examStage: calculateStage(examRate)
       };
     }));
   };
@@ -93,7 +105,7 @@ function App() {
         </div>
         <div className="stats-bar">
           <div className="stat-item">
-            <span className="stat-label">全体平均達成率</span>
+            <span className="stat-label">{mode === 'exam' ? '塾生平均達成率' : '全体平均達成率'}</span>
             <span className="stat-value">{stats.avgRate.toFixed(1)}%</span>
           </div>
           <div className="stat-item">
@@ -106,18 +118,10 @@ function App() {
           </div>
         </div>
         <div className="tab-controls">
-          <a 
-            href="#farm" 
-            className={`tab-btn ${activeTab === 'farm' ? 'active' : ''}`}
-          >
-            教室一覧
-          </a>
-          <a 
-            href="#team" 
-            className={`tab-btn ${activeTab === 'team' ? 'active' : ''}`}
-          >
-            チームランキング
-          </a>
+          <a href="#farm" className={`tab-btn ${activeTab === 'farm' ? 'active' : ''}`}>全体<br/>教室一覧</a>
+          <a href="#team" className={`tab-btn ${activeTab === 'team' ? 'active' : ''}`}>全体<br/>チーム</a>
+          <a href="#exam-farm" className={`tab-btn ${activeTab === 'exam-farm' ? 'active' : ''}`}>塾生<br/>教室一覧</a>
+          <a href="#exam-team" className={`tab-btn ${activeTab === 'exam-team' ? 'active' : ''}`}>塾生<br/>チーム</a>
         </div>
         <button className="admin-btn" onClick={() => setIsAdminOpen(true)}>
           <Settings size={20} />
@@ -126,16 +130,16 @@ function App() {
       </header>
 
       <main className="content-area">
-        {activeTab === 'farm' ? (
-          <SunflowerField schools={data} />
+        {activeTab.includes('farm') ? (
+          <SunflowerField schools={data} mode={mode} />
         ) : (
-          <TeamRanking schools={data} />
+          <TeamRanking schools={data} mode={mode} />
         )}
         <aside className={`side-panel ${showRanking ? 'open' : ''}`}>
           <button className="toggle-ranking" onClick={() => setShowRanking(!showRanking)}>
             {showRanking ? '◀ フィールド表示' : '▶ ランキング表示'}
           </button>
-          <RankingPanel schools={data} />
+          <RankingPanel schools={data} mode={mode} />
         </aside>
       </main>
 

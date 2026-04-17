@@ -3,15 +3,20 @@ import type { SchoolData } from '../data';
 
 interface Props {
   school: SchoolData;
+  mode?: 'overall' | 'exam';
 }
 
-const Sunflower: React.FC<Props> = ({ school }) => {
+const Sunflower: React.FC<Props> = ({ school, mode = 'overall' }) => {
   const [isHovered, setIsHovered] = useState(false);
 
+  const isExam = mode === 'exam';
+  const stage = isExam ? (school.examStage || 1) : school.stage;
+  const rate = isExam ? (school.examRate || 0) : school.rate;
+
   // 1-20のステージ番号からファイル名を生成
-  const getImageUrl = (stage: number) => {
-    const groupNum = Math.ceil(stage / 5);
-    const indexInGroup = ((stage - 1) % 5) + 1;
+  const getImageUrl = (stageNum: number) => {
+    const groupNum = Math.ceil(stageNum / 5);
+    const indexInGroup = ((stageNum - 1) % 5) + 1;
     
     let groupStr = "";
     if (groupNum === 1) groupStr = "01to05";
@@ -22,7 +27,7 @@ const Sunflower: React.FC<Props> = ({ school }) => {
     return `${import.meta.env.BASE_URL}assets/sunflowers/stage${groupStr}_0${indexInGroup}.png`;
   };
 
-  const imageUrl = getImageUrl(school.stage);
+  const imageUrl = getImageUrl(stage);
 
   return (
     <div 
@@ -33,14 +38,14 @@ const Sunflower: React.FC<Props> = ({ school }) => {
       <div className="sunflower-image-container">
         <img 
           src={imageUrl} 
-          alt={`Stage ${school.stage}`} 
+          alt={`Stage ${stage}`} 
           className="sunflower-image"
         />
-        {school.stage === 20 && <div className="sparkles" />}
+        {stage === 20 && <div className="sparkles" />}
       </div>
       <div className="school-info">
         <span className="school-name" translate="no">{school.name}</span>
-        <span className="school-rate">{school.rate.toFixed(1)}%</span>
+        <span className="school-rate">{rate.toFixed(1)}%</span>
       </div>
 
       <style>{`

@@ -8,6 +8,10 @@ export interface SchoolData {
   stage: number;
   lastRate?: number;
   team?: string;
+  examTarget?: number;
+  examAchievement?: number;
+  examRate?: number;
+  examStage?: number;
 }
 
 export const INITIAL_DATA: SchoolData[] = [

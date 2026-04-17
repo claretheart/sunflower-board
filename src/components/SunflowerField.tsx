@@ -5,9 +5,10 @@ import Sunflower from './Sunflower.tsx';
 interface Props {
   schools: SchoolData[];
   compact?: boolean;
+  mode?: 'overall' | 'exam';
 }
 
-const SunflowerField: React.FC<Props> = ({ schools, compact = false }) => {
+const SunflowerField: React.FC<Props> = ({ schools, compact = false, mode = 'overall' }) => {
   // Sort schools by region/ID to keep consistent layout
   const sortedSchools = [...schools].sort((a, b) => a.id.localeCompare(b.id));
 
@@ -16,7 +17,7 @@ const SunflowerField: React.FC<Props> = ({ schools, compact = false }) => {
       <div className="field-grid">
         {sortedSchools.map((school) => (
           <div className="sunflower-wrapper" key={school.id}>
-            <Sunflower school={school} />
+            <Sunflower school={school} mode={mode} />
           </div>
         ))}
       </div>

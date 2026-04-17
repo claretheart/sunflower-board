@@ -27,7 +27,9 @@ export const fetchAndUpdateData = async (currentData: SchoolData[], url: string)
         return {
           ...school,
           target: Number(row['目標値'] || row['目標'] || row['target'] || school.target),
-          achievement: Number(row['実績値'] || row['実績'] || row['achievement'] || school.achievement)
+          achievement: Number(row['実績値'] || row['実績'] || row['achievement'] || school.achievement),
+          examTarget: Number(row['受験生目標'] || school.examTarget || 0),
+          examAchievement: Number(row['受験生実績'] || school.examAchievement || 0)
         };
       }
       return school;

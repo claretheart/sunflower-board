@@ -4,10 +4,16 @@ import { Trophy, Minus } from 'lucide-react';
 
 interface Props {
   schools: SchoolData[];
+  mode?: 'overall' | 'exam';
 }
 
-const RankingPanel: React.FC<Props> = ({ schools }) => {
-  const rankedSchools = [...schools].sort((a, b) => b.rate - a.rate);
+const RankingPanel: React.FC<Props> = ({ schools, mode = 'overall' }) => {
+  const isExam = mode === 'exam';
+  const rankedSchools = [...schools].sort((a, b) => {
+    const rateA = isExam ? (a.examRate || 0) : a.rate;
+    const rateB = isExam ? (b.examRate || 0) : b.rate;
+    return rateB - rateA;
+  });
 
   return (
     <div className="ranking-panel">
@@ -32,7 +38,7 @@ const RankingPanel: React.FC<Props> = ({ schools }) => {
               <div className="ranking-details">
                 <span className="school-name">{school.name}</span>
                 <div className="ranking-stats">
-                  <span className="rate-badge">{school.rate.toFixed(1)}%</span>
+                  <span className="rate-badge">{(isExam ? (school.examRate || 0) : school.rate).toFixed(1)}%</span>
                   <div className="movement-icon">
                     {/* Simplified movement placeholder */}
                     <Minus size={14} color="#999" />

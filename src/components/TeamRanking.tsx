@@ -5,9 +5,12 @@ import SunflowerField from './SunflowerField';
 interface Props {
   schools: SchoolData[];
   onSchoolClick?: (schoolId: string) => void;
+  mode?: 'overall' | 'exam';
 }
 
-const TeamRanking: React.FC<Props> = ({ schools }) => {
+const TeamRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
+  const isExam = mode === 'exam';
+  
   // チームごとの集計
   const teamsMap = new Map<string, { target: number; achievement: number; schools: SchoolData[] }>();
   
@@ -19,8 +22,8 @@ const TeamRanking: React.FC<Props> = ({ schools }) => {
       teamsMap.set(teamName, { target: 0, achievement: 0, schools: [] });
     }
     const t = teamsMap.get(teamName)!;
-    t.target += school.target;
-    t.achievement += school.achievement;
+    t.target += isExam ? (school.examTarget || 0) : school.target;
+    t.achievement += isExam ? (school.examAchievement || 0) : school.achievement;
     t.schools.push(school);
   });
 
@@ -96,7 +99,7 @@ const TeamRanking: React.FC<Props> = ({ schools }) => {
           </div>
         )}
         {activeTeamData ? (
-          <SunflowerField schools={activeTeamData.data.schools} compact={true} />
+          <SunflowerField schools={activeTeamData.data.schools} compact={true} mode={mode} />
         ) : (
           <p>チームがありません</p>
         )}
