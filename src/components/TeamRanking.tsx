@@ -70,7 +70,6 @@ const TeamRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
             onClick={() => setSelectedTeam(team.name)}
           >
             <div className="team-card-bg" style={{ backgroundImage: `url(${getImageUrl(team.stage)})` }}></div>
-            {team.rate >= 100 && <div className="card-sparkles" />}
             <div className="team-card-content">
               <div className="rank-badge">{index + 1}位</div>
               <h3 className="team-name" translate="no">{team.name}</h3>
@@ -123,6 +122,25 @@ const TeamRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
           overflow-x: auto;
           padding-bottom: 10px;
           flex-shrink: 0;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .team-cards-row::-webkit-scrollbar {
+          height: 12px;
+          display: block;
+        }
+        .team-cards-row::-webkit-scrollbar-track {
+          background: #f0f0f0;
+          border-radius: 10px;
+          box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+        .team-cards-row::-webkit-scrollbar-thumb {
+          background: #777;
+          border-radius: 10px;
+          border: 3px solid rgba(255,255,255,0.8);
+        }
+        .team-cards-row::-webkit-scrollbar-thumb:hover {
+          background: #555;
         }
 
         .team-card {
@@ -260,23 +278,6 @@ const TeamRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
           font-size: 0.9rem;
         }
 
-        .card-sparkles {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: url('https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png') no-repeat center center;
-          background-size: 60%;
-          animation: card-glitter 1.5s infinite alternate;
-          pointer-events: none;
-          z-index: 5;
-          opacity: 0.8;
-        }
-
-        @keyframes card-glitter {
-          from { opacity: 0.4; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1.1); }
         }
       `}</style>
     </div>

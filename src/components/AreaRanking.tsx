@@ -112,7 +112,6 @@ const AreaRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
               onClick={() => setSelectedArea(area.name)}
             >
                 <div className="team-card-bg" style={{ backgroundImage: `url(${getImageUrl(area.stage)})` }}></div>
-                {area.rate >= 100 && <div className="card-sparkles" />}
                 <div className="team-card-content">
                 <div className="rank-badge">
                   {index + 1}位
@@ -181,8 +180,7 @@ const AreaRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
           padding: 15px 5px 25px 5px;
           flex-shrink: 0;
           scroll-behavior: smooth;
-          scrollbar-width: auto;
-          scrollbar-color: #bbb rgba(255, 255, 255, 0.8);
+          -webkit-overflow-scrolling: touch;
         }
         
         .team-cards-row::-webkit-scrollbar {
@@ -195,12 +193,12 @@ const AreaRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
           box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
         }
         .team-cards-row::-webkit-scrollbar-thumb {
-          background: #bbb;
+          background: #777;
           border-radius: 10px;
-          border: 3px solid #f0f0f0;
+          border: 3px solid rgba(255,255,255,0.8);
         }
         .team-cards-row::-webkit-scrollbar-thumb:hover {
-          background: #888;
+          background: #555;
         }
 
         .scroll-arrow {
@@ -337,7 +335,7 @@ const AreaRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
         .team-schools-area {
           background: rgba(255, 255, 255, 0.9);
           border-radius: 20px;
-          padding: 20px;
+          padding: 15px 20px;
           flex: 1;
           display: flex;
           flex-direction: column;
@@ -369,24 +367,6 @@ const AreaRanking: React.FC<Props> = ({ schools, mode = 'overall' }) => {
           font-size: 0.9rem;
         }
 
-        .card-sparkles {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: url('https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png') no-repeat center center;
-          background-size: 60%;
-          animation: card-glitter 1.5s infinite alternate;
-          pointer-events: none;
-          z-index: 5;
-          opacity: 0.8;
-        }
-
-        @keyframes card-glitter {
-          from { opacity: 0.4; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1.1); }
-        }
       `}</style>
     </div>
   );

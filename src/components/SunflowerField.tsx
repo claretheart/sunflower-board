@@ -32,8 +32,9 @@ const SunflowerField: React.FC<Props> = ({ schools, compact = false, mode = 'ove
           z-index: 10;
         }
         .sunflower-field.compact {
-          padding: 10px;
-          overflow-y: visible;
+          padding: 5px 10px 15px 10px;
+          min-height: 210px;
+          overflow: visible;
         }
         .field-grid {
           display: grid;
@@ -48,13 +49,48 @@ const SunflowerField: React.FC<Props> = ({ schools, compact = false, mode = 'ove
           justify-content: flex-start;
           gap: 10px;
           overflow-x: auto;
-          padding-bottom: 15px;
+          padding-bottom: 5px;
+          -webkit-overflow-scrolling: touch;
         }
+        
+        .sunflower-field.compact .field-grid::-webkit-scrollbar {
+          height: 12px;
+          display: block;
+        }
+        .sunflower-field.compact .field-grid::-webkit-scrollbar-track {
+          background: #f0f0f0;
+          border-radius: 10px;
+          box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+        .sunflower-field.compact .field-grid::-webkit-scrollbar-thumb {
+          background-color: #777;
+          border-radius: 10px;
+          border: 3px solid rgba(255,255,255,0.8);
+        }
+        .sunflower-field.compact .field-grid::-webkit-scrollbar-thumb:hover {
+          background-color: #555;
+        }
+
         .sunflower-field.compact .sunflower-wrapper {
           transform: scale(0.85);
           transform-origin: top center;
           height: 190px;
           flex-shrink: 0;
+        }
+        @media print {
+          .sunflower-field {
+            padding: 20px !important;
+            overflow: visible !important;
+          }
+          .field-grid {
+            grid-template-columns: repeat(8, 1fr) !important;
+            gap: 12px 8px !important;
+            max-width: none !important;
+          }
+          .sunflower-wrapper {
+            transform: scale(0.8) !important;
+            height: 140px !important;
+          }
         }
       `}</style>
     </div>

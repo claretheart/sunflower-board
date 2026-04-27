@@ -8,7 +8,6 @@ import AreaRanking from './components/AreaRanking.tsx';
 import RankingPanel from './components/RankingPanel.tsx';
 import { GOOGLE_SHEETS_CSV_URL, fetchAndUpdateData } from './utils/syncData';
 import { Sun, Cloud } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 function App() {
   // データは初期値からスタートし、マウント後に外部から取得する
@@ -27,6 +26,20 @@ function App() {
   });
   
   const mode: 'overall' | 'exam' = activeTab.includes('exam') ? 'exam' : 'overall';
+
+  const updateData = (newData: SchoolData[]) => {
+    setData(newData.map(d => {
+      const rate = d.target > 0 ? parseFloat(((d.achievement / d.target) * 100).toFixed(1)) : 0;
+      const examRate = (d.examTarget && d.examTarget > 0) ? parseFloat((((d.examAchievement || 0) / d.examTarget) * 100).toFixed(1)) : 0;
+      return {
+        ...d,
+        rate,
+        stage: calculateStage(rate),
+        examRate,
+        examStage: calculateStage(examRate)
+      };
+    }));
+  };
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -48,7 +61,6 @@ function App() {
       }
     };
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const stats = useMemo(() => {
@@ -66,63 +78,6 @@ function App() {
     return { avgRate, fullBloomCount, daysLeft: diff };
   }, [data, mode]);
 
-  const updateData = (newData: SchoolData[]) => {
-    // Helper to check if a group reached 100%
-    const checkGroupNewlyAchieved = (groupField: 'team' | 'area', isExam: boolean) => {
-      const getRate = (schools: SchoolData[]) => {
-        const ach = schools.reduce((sum, s) => sum + (isExam ? (s.examAchievement || 0) : s.achievement), 0);
-        const tar = schools.reduce((sum, s) => sum + (isExam ? (s.examTarget || 0) : s.target), 0);
-        return tar > 0 ? (ach / tar) * 100 : 0;
-      };
-
-      const groups = Array.from(new Set(newData.map(s => s[groupField]).filter(Boolean)));
-      for (const groupName of groups) {
-        const newGroupSchools = newData.filter(s => s[groupField] === groupName);
-        const oldGroupSchools = data.filter(s => s[groupField] === groupName);
-        if (getRate(newGroupSchools) >= 100 && getRate(oldGroupSchools) < 100) return true;
-      }
-      return false;
-    };
-
-    // Check for newly achieved 100% (Schools, Teams, Areas)
-    const schoolNewlyAchieved = newData.some(newSchool => {
-      const oldSchool = data.find(s => s.id === newSchool.id);
-      const newRate = (newSchool.achievement / newSchool.target) * 100;
-      const newExamRate = (newSchool.examTarget && newSchool.examTarget > 0) ? ((newSchool.examAchievement || 0) / newSchool.examTarget) * 100 : 0;
-      const oldRate = oldSchool ? (oldSchool.achievement / oldSchool.target) * 100 : 0;
-      const oldExamRate = (oldSchool && oldSchool.examTarget && oldSchool.examTarget > 0) ? ((oldSchool.examAchievement || 0) / oldSchool.examTarget) * 100 : 0;
-      return (newRate >= 100 && oldRate < 100) || (newExamRate >= 100 && oldExamRate < 100);
-    });
-
-    const anyGroupAchieved = checkGroupNewlyAchieved('team', false) || 
-                             checkGroupNewlyAchieved('team', true) || 
-                             checkGroupNewlyAchieved('area', false) || 
-                             checkGroupNewlyAchieved('area', true);
-
-    if (schoolNewlyAchieved || anyGroupAchieved) {
-      // Delay slightly for UI to update first
-      setTimeout(() => {
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#ffeb3b', '#fbc02d', '#4caf50', '#ffffff']
-        });
-      }, 500);
-    }
-
-    setData(newData.map(d => {
-      const rate = d.target > 0 ? parseFloat(((d.achievement / d.target) * 100).toFixed(1)) : 0;
-      const examRate = (d.examTarget && d.examTarget > 0) ? parseFloat((((d.examAchievement || 0) / d.examTarget) * 100).toFixed(1)) : 0;
-      return {
-        ...d,
-        rate,
-        stage: calculateStage(rate),
-        examRate,
-        examStage: calculateStage(examRate)
-      };
-    }));
-  };
 
   const renderContent = () => {
     if (activeTab.includes('farm')) {
@@ -179,6 +134,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;

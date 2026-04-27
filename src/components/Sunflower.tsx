@@ -41,7 +41,6 @@ const Sunflower: React.FC<Props> = ({ school, mode = 'overall' }) => {
           alt={`Stage ${stage}`} 
           className="sunflower-image"
         />
-        {stage === 20 && <div className="sparkles" />}
       </div>
       <div className="school-info">
         <span className="school-name" translate="no">{school.name}</span>
@@ -122,20 +121,6 @@ const Sunflower: React.FC<Props> = ({ school, mode = 'overall' }) => {
           color: #388e3c;
           font-weight: 800;
         }
-        .sparkles {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: url('https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png') no-repeat center center;
-          background-size: contain;
-          animation: glitter 1s infinite alternate;
-          pointer-events: none;
-        }
-        @keyframes glitter {
-          from { opacity: 0.5; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1.1); }
         }
       `}</style>
     </div>

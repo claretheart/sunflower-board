@@ -188,4 +188,51 @@
   color: white;
   border-color: #f57c00;
   box-shadow: 0 4px 10px rgba(255, 179, 0, 0.3);
+  border-color: #f57c00;
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 297mm;
+    height: 210mm;
+  }
+
+  .app-main {
+    height: 210mm !important;
+    width: 297mm !important;
+    overflow: hidden !important;
+    background-image: url('/assets/background.png') !important;
+    background-size: cover !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .app-header {
+    background: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: none !important;
+    border-bottom: 2px solid #ffb300;
+  }
+
+  .side-panel,
+  .toggle-ranking,
+  .admin-btn {
+    display: none !important;
+  }
+
+  .content-area {
+    height: calc(210mm - 80px) !important;
+    overflow: hidden !important;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
 }
